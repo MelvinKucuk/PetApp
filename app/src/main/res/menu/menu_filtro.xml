@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/itemSearchMenu"
+        android:title="@string/buscar"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        android:icon="@drawable/ic_search_white_24dp"
+        />
+
+    <item
+        android:id="@+id/itemAscMenu"
+        android:title="@string/ordenar_ascendente"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:icon="@drawable/ic_ascendent_white_24dp"
+        />
+
+    <item
+        android:id="@+id/itemDescMenu"
+        android:title="@string/ordenar_descendente"
+        app:showAsAction="ifRoom|collapseActionView"
+        android:icon="@drawable/ic_descendent_white_24dp"
+        />
+
+</menu>
