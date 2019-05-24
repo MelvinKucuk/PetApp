@@ -1,12 +1,11 @@
 package com.melvin.flux.view;
 
-import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.melvin.flux.R;
 
-public class DetailActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener {
+public class DetailActivity extends AppCompatActivity implements DetailFragment.OnFragmentInteractionListener {
 
     public static final String KEY_ID = "id";
 
@@ -15,14 +14,19 @@ public class DetailActivity extends AppCompatActivity implements MapFragment.OnF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        MapFragment fragment = new MapFragment();
+        String id = getIntent().getExtras().getString(KEY_ID);
+
+        DetailFragment fragment = new DetailFragment();
+        Bundle data = new Bundle();
+        data.putString(DetailFragment.KEY_PETID, id);
+        fragment.setArguments(data);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.layout_container, fragment).commit();
-
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void onMapClicked() {
+        MapFragment fragment = new MapFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.layout_container, fragment).commit();
     }
 }

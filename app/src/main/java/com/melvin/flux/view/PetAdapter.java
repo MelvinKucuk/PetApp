@@ -88,11 +88,11 @@ public class PetAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    public void orderAsc(){
+    public void orderAsc() {
         Pet aux;
 
-        for (int i = 0; i <data.size(); i++){
-            for (int j = i+1; j< data.size(); j++){
+        for (int i = 0; i < data.size(); i++) {
+            for (int j = i + 1; j < data.size(); j++) {
                 if (data.get(i).getName() != null && data.get(j).getName() != null) {
                     if (data.get(i).getName().toLowerCase().compareTo(data.get(j).getName().toLowerCase()) > 0) {
                         aux = data.get(i);
@@ -105,11 +105,11 @@ public class PetAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    public void orderDec(){
+    public void orderDec() {
         Pet aux;
 
-        for (int i = 0; i <data.size(); i++){
-            for (int j = i+1; j< data.size(); j++){
+        for (int i = 0; i < data.size(); i++) {
+            for (int j = i + 1; j < data.size(); j++) {
                 if (data.get(i).getName() != null && data.get(j).getName() != null) {
                     if (data.get(i).getName().toLowerCase().compareTo(data.get(j).getName().toLowerCase()) < 0) {
                         aux = data.get(i);

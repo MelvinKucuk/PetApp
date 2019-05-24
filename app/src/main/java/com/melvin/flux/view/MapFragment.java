@@ -9,16 +9,13 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,15 +28,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.melvin.flux.R;
 
-import static android.content.Context.LOCATION_SERVICE;
+public class MapFragment extends Fragment implements LocationListener {
 
-public class MapFragment extends Fragment {
+    private Location location;
+    private double latitude;
+    private double longitude;
 
-    private OnFragmentInteractionListener mListener;
-    private boolean canGetLocation;
-
-    public static final long MIN_TIME_BW_UPDATES = 0;
-    public static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
+    public static final int REQUEST_LOCATION = 4;
 
     public MapFragment() {
         // Required empty public constructor
@@ -55,20 +50,36 @@ public class MapFragment extends Fragment {
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.frg);
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(GoogleMap mMap) {
+            public void onMapReady(final GoogleMap mMap) {
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
                 mMap.clear();
 
-                double latitude = 0;
-                double longitude = 0;
-                Location loc = null;
-
-
-                final LocationListener mLocationListener = new LocationListener() {
+                LocationManager locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
+                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                    }, REQUEST_LOCATION);
+                }
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 120000, 1, new LocationListener() {
                     @Override
-                    public void onLocationChanged(final Location location) {
-                        //your code here
+                    public void onLocationChanged(Location location) {
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
+
+                        CameraPosition googlePlex = CameraPosition.builder()
+                                .target(new LatLng(latitude, longitude))
+                                .zoom(10)
+                                .bearing(0)
+                                .build();
+
+                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(googlePlex), 10000, null);
+
+                        mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(latitude, longitude))
+                                .icon(bitmapDescriptorFromVector(getActivity(), R.drawable.ic_location_24dp)));
                     }
 
                     @Override
@@ -85,99 +96,18 @@ public class MapFragment extends Fragment {
                     public void onProviderDisabled(String s) {
 
                     }
-                };
-
-                LocationManager locationManager = (LocationManager) getContext()
-                        .getSystemService(LOCATION_SERVICE);
-
-                // getting GPS status
-                boolean checkGPS = locationManager
-                        .isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-                // getting network status
-                boolean checkNetwork = locationManager
-                        .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-                if (!checkGPS && !checkNetwork) {
-                    Toast.makeText(getContext(), "No Service Provider Available", Toast.LENGTH_SHORT).show();
-                } else {
-                    canGetLocation = true;
-                    // First get location from Network Provider
-                    if (checkNetwork) {
-                        Toast.makeText(getContext(), "Network", Toast.LENGTH_SHORT).show();
-
-                        try {
-                            locationManager.requestLocationUpdates(
-                                    LocationManager.NETWORK_PROVIDER,
-                                    MIN_TIME_BW_UPDATES,
-                                    MIN_DISTANCE_CHANGE_FOR_UPDATES, mLocationListener);
-                            Log.d("Network", "Network");
-
-                            if (locationManager != null) {
-                                loc = locationManager
-                                        .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-                            }
-
-                            if (loc != null) {
-                                latitude = loc.getLatitude();
-                                longitude = loc.getLongitude();
-                            }
-                        } catch (SecurityException e) {
-
-                        }
-                    }
-                }
-                // if GPS Enabled get lat/long using GPS Services
-                if (checkGPS) {
-                    Toast.makeText(getContext(), "GPS", Toast.LENGTH_SHORT).show();
-                    if (loc == null) {
-
-                        try {
-                            if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
-                                    PackageManager.PERMISSION_GRANTED &&
-                                    ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                                            PackageManager.PERMISSION_GRANTED) {
-                                locationManager.requestLocationUpdates(
-                                        LocationManager.GPS_PROVIDER,
-                                        MIN_TIME_BW_UPDATES,
-                                        MIN_DISTANCE_CHANGE_FOR_UPDATES, mLocationListener);
-                                Log.d("GPS Enabled", "GPS Enabled");
-                                if (locationManager != null) {
-                                    loc = locationManager
-                                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                                    if (loc != null) {
-                                        latitude = loc.getLatitude();
-                                        longitude = loc.getLongitude();
-                                    }
-                                }
-                            }
-                        } catch (SecurityException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                });
+                if (location != null) {
+                    location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
                 }
 
-
-
-                CameraPosition googlePlex = CameraPosition.builder()
-                        .target(new LatLng(latitude,longitude))
-                        .zoom(10)
-                        .bearing(0)
-                        .tilt(45)
-                        .build();
-
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(googlePlex), 10000, null);
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(-34.9208142, -57.9518059)));
 
                 mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(latitude,longitude))
-                        .icon(bitmapDescriptorFromVector(getActivity(),R.drawable.ic_location_white_24dp)));
-
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(-34.9208142,-57.9518059)));
-
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(-34.6188126,-58.3677217)));
+                        .position(new LatLng(-34.6188126, -58.3677217)));
             }
         });
 
@@ -195,23 +125,22 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+    public void onLocationChanged(Location location) {
+
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
     }
 
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
+    @Override
+    public void onProviderEnabled(String s) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String s) {
+
     }
 }

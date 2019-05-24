@@ -5,7 +5,7 @@ import org.simpleframework.xml.Root;
 
 
 @Root(name = "Pet", strict = false)
-public class Pet  {
+public class Pet {
 
     @Element(name = "id")
     private String id;
@@ -13,16 +13,13 @@ public class Pet  {
     @Element(name = "name", required = false)
     private String name;
 
-    @Element(name = "category", required = false)
-    private Category category;
 
     public Pet() {
     }
 
-    public Pet(String id, String name, Category category) {
+    public Pet(String id, String name) {
         this.id = id;
         this.name = name;
-        this.category = category;
     }
 
     public String getId() {
@@ -39,9 +36,5 @@ public class Pet  {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Category getCategory() {
-        return category;
     }
 }

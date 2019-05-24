@@ -13,13 +13,11 @@ import java.util.List;
 
 public class ControllerPet {
 
-    public void getPets(Context context, final ResultListener<List<Pet>> listenerView){
-
-        if (Utils.isOnline(context)){
+    public void getPets(Context context, final ResultListener<List<Pet>> listenerView) {
+        if (Utils.isOnline(context)) {
             new DaoPet().getPets(context, new ResultListener<List<Pet>>() {
                 @Override
                 public void finish(List<Pet> resultado) {
-
                     // Filtro los de nombre null
 
                     List<Pet> aux = new ArrayList<>();
@@ -32,6 +30,17 @@ public class ControllerPet {
                     listenerView.finish(resultado);
                 }
             });
+        }
+    }
+
+    public void getPetById(Context context, final ResultListener<Pet> listenerView, String id) {
+        if (Utils.isOnline(context)) {
+            new DaoPet().getPetById(new ResultListener<Pet>() {
+                @Override
+                public void finish(Pet resultado) {
+                    listenerView.finish(resultado);
+                }
+            }, id);
         }
     }
 }
